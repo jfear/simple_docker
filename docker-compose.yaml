@@ -1,0 +1,104 @@
+version: '2'
+services:
+  attribute_selector_underground:
+    image: jfear/biometalib
+    command:
+      - "attribute_selector"
+      - "--host"
+      - "mongo.geneticsunderground.com"
+      - "--port"
+      - "27022"
+      - "-u"
+      - "sra"
+      - "-p"
+      - "oliver"
+      - "--authenticationDatabase"
+      - "user-data"
+      - "--db"
+      - "sra"
+      - "--config"
+      - "/data/flybase_example.yaml"
+    links:
+      - db
+    volumes:
+      - ./data:/data
+    tty: true
+    stdin_open: true
+  attribute_selector:
+    image: jfear/biometalib
+    command:
+      - "attribute_selector"
+      - "--host"
+      - "db"
+      - "--port"
+      - "27017"
+      - "--db"
+      - "sra"
+      - "--config"
+      - "/data/flybase_example.yaml"
+    links:
+      - db
+    volumes:
+      - ./data:/data
+    tty: true
+    stdin_open: true
+  sra2mongo:
+    image: jfear/biometalib
+    command:
+      - "sra2mongo"
+      - "--host"
+      - "db"
+      - "--port"
+      - "27017"
+      - "--email"
+      - "justin.fear@nih.gov"
+      - "--db"
+      - "sra"
+      - "--query"
+      - "\"Drosophila melanogaster\"[orgn]"
+    links:
+      - db
+    working_dir: /data
+    volumes:
+      - ./data:/data
+    tty: true
+    stdin_open: true
+  build_biometa:
+    image: jfear/biometalib
+    command:
+      - "initialize_biometa"
+      - "--host"
+      - "db"
+      - "--port"
+      - "27017"
+      - "--db"
+      - "sra"
+    links:
+      - db
+    tty: true
+    stdin_open: true
+  download_database:
+    build:
+      context: .
+      dockerfile: Docker.download_database
+    links:
+      - db
+    tty: true
+    stdin_open: true
+  db:
+    image: mongo
+    restart: always
+    volumes:
+      - ./db:/data/db
+    ports:
+      - "27017:27017"
+    tty: true
+    stdin_open: true
+  mongo:
+    image: mongo
+    links:
+      - db
+    command: '/bin/bash'
+    tty: true
+    stdin_open: true
+

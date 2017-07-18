@@ -1,0 +1,14 @@
+FROM mongo
+
+MAINTAINER Justin Fear <justin.m.fear@gmail.com>
+
+WORKDIR /data
+
+RUN apt-get update && apt-get install -y wget && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN wget --quiet https://helix.nih.gov/~fearjm/db_backup.tgz && \
+    tar -zxf db_backup.tgz && \
+    rm db_backup.tgz
+
+CMD ["mongorestore", "--dir", "/data/db_backup/", "--host", "db", "--port", "27017"]

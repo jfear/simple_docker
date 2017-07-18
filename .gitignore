@@ -1,0 +1,5 @@
+# Ignore folders created by the pipeline
+data/.cache
+db_backup
+db
+
